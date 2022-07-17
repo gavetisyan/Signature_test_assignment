@@ -18,21 +18,22 @@ namespace Signature
             while (chunkLength < 1)
             {
                 chunkLength = GetChunkLength(args.Length > 1 ? args[1] : null);
-                if (chunkLength < 1)
-                    Console.WriteLine("Chunk size must be positive.");
             }
+
+
             MyFileReader fileReader = new MyFileReader(fileName, chunkLength);
             using (FileStream fileStream = fileReader.Initialize())
             {
                 if (fileStream == null)
                 {
-                    Console.WriteLine("Error occured. Press any key to exit.");
-                    Console.ReadKey();
+                    ConsoleInputOutput.ExitProgram(Reason.Error);
                 }
                 else
                 {
                     FileProcessor fileProcessor = new FileProcessor(fileReader, fileStream);
                     fileProcessor.Process();
+                    
+                    ConsoleInputOutput.ExitProgram(Reason.Finished);
                 }
             }
         }
@@ -60,6 +61,9 @@ namespace Signature
                 userChunkLength = Console.ReadLine();
             }
             int chunkLength = int.Parse(userChunkLength);
+
+            if (chunkLength < 1)
+                Console.WriteLine("Chunk size must be positive.");
             return chunkLength;
         }
 
