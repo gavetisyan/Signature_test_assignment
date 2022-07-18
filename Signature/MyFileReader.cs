@@ -25,19 +25,15 @@ namespace Signature
             {
                 fileStream = File.Open(fileName, FileMode.Open);
             }
-            catch (ArgumentException e)
-            {
-                Console.WriteLine("Please provide a valid file name.");
-                Console.WriteLine(e.Message + e.StackTrace);
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine("Could not open file.");
-                Console.WriteLine(e.Message + e.StackTrace);
-            }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message + e.StackTrace);
+                if (e is ArgumentException)
+                    e.PrintException(ErrorReason.InvalidFileName);
+                else if (e is IOException)
+                    e.PrintException(ErrorReason.CouldNotOpenFile);
+                else
+                    e.PrintException();
+                throw;
             }
             return fileStream;
         }

@@ -6,23 +6,45 @@ using System.Threading.Tasks;
 
 namespace Signature
 {
-    public enum Reason
+    public enum ProgramFinishReason
     {
         Error,
         Finished
     }
 
-    class ConsoleInputOutput
+    public enum ErrorReason
     {
-        private static Dictionary<Reason, string> exitReasonStrings = new Dictionary<Reason, string>{
-            {Reason.Error, "Error occured. Press any key to exit."},
-                { Reason.Finished, "Program finished. Press any key to exit."} };
- 
+        InvalidFileName,
+        CouldNotOpenFile,
+        OutOfMemory
+    }
 
-        public static void ExitProgram(Reason reason)
+    static class ConsoleInputOutput
+    {
+        private static Dictionary<ProgramFinishReason, string> exitReasonStrings =
+            new Dictionary<ProgramFinishReason, string>{
+            {ProgramFinishReason.Error, "Error occured. Press any key to exit."},
+            {ProgramFinishReason.Finished, "Program finished. Press any key to exit."}
+        };
+
+        private static Dictionary<ErrorReason, string> errorTexts =
+            new Dictionary<ErrorReason, string> {
+                {ErrorReason.InvalidFileName, "Invalid file name." },
+                {ErrorReason.CouldNotOpenFile, "Could not open file."},
+                { ErrorReason.OutOfMemory, "Out of memory. Perhaps chunk size is too long." }
+            };
+
+        public static void ExitProgram(ProgramFinishReason reason)
         {
             Console.WriteLine(exitReasonStrings[reason]);
             Console.ReadKey();
+        }
+
+        internal static void PrintException(this Exception e, ErrorReason? reason = null)
+        {
+            if (reason.HasValue)
+                Console.WriteLine(errorTexts[reason.Value]);
+            Console.WriteLine(e.Message + e.StackTrace);
         }
     }
 }

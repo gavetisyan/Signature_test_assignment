@@ -15,27 +15,20 @@ namespace Signature
             int chunkLength = 0;
 
             fileName = GetFileLocation(args.Length > 0 ? args[0] : null);
-            while (chunkLength < 1)
-            {
-                chunkLength = GetChunkLength(args.Length > 1 ? args[1] : null);
-            }
-
-
+            chunkLength = GetChunkLength(args.Length > 1 ? args[1] : null);
+            
             MyFileReader fileReader = new MyFileReader(fileName, chunkLength);
-            using (FileStream fileStream = fileReader.Initialize())
-            {
-                if (fileStream == null)
-                {
-                    ConsoleInputOutput.ExitProgram(Reason.Error);
-                }
-                else
-                {
-                    FileProcessor fileProcessor = new FileProcessor(fileReader, fileStream);
-                    fileProcessor.Process();
-                    
-                    ConsoleInputOutput.ExitProgram(Reason.Finished);
-                }
-            }
+            FileProcessor fileProcessor = new FileProcessor(fileReader);
+
+            var startTime = DateTime.Now;
+
+            fileProcessor.Process();
+
+            var endTime = DateTime.Now;
+            TimeSpan processingTime = endTime - startTime;
+
+            Console.WriteLine($"Start:\t{startTime}\nEnd:\t{endTime}\nProcessingTime:\t{processingTime}");
+            ConsoleInputOutput.ExitProgram(ProgramFinishReason.Finished);
         }
 
         private static string GetFileLocation(string fileName)
@@ -55,15 +48,21 @@ namespace Signature
 
         private static int GetChunkLength(string userChunkLength)
         {
-            if (string.IsNullOrEmpty(userChunkLength))
+            int chunkLength = 0;
+
+            if (!string.IsNullOrWhiteSpace(userChunkLength))
+                chunkLength = int.Parse(userChunkLength);
+
+            while (chunkLength < 1)
             {
                 Console.WriteLine("Please input length of chunks:");
                 userChunkLength = Console.ReadLine();
-            }
-            int chunkLength = int.Parse(userChunkLength);
+                // check user input for value
+                chunkLength = int.Parse(userChunkLength);
 
-            if (chunkLength < 1)
-                Console.WriteLine("Chunk size must be positive.");
+                if (chunkLength < 1)
+                    Console.WriteLine("Chunk size must be positive.");
+            }
             return chunkLength;
         }
 

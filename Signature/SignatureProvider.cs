@@ -24,7 +24,6 @@ namespace Signature
                 {
                     ProcessQueueElement(chunkQueue, hashes);
                 }
-                Thread.Sleep(0);
             }
         }
 
