@@ -22,13 +22,13 @@ namespace Signature
 
             var startTime = DateTime.Now;
 
-            fileProcessor.Process();
+            bool finalStatus = fileProcessor.Process();
 
             var endTime = DateTime.Now;
             TimeSpan processingTime = endTime - startTime;
 
             Console.WriteLine($"Start:\t{startTime}\nEnd:\t{endTime}\nProcessingTime:\t{processingTime}");
-            ConsoleInputOutput.ExitProgram(ProgramFinishReason.Finished);
+            ConsoleInputOutput.ExitProgram(finalStatus ? ProgramFinishReason.Finished :ProgramFinishReason.Error);
         }
 
         private static string GetFileLocation(string fileName)
@@ -49,19 +49,19 @@ namespace Signature
         private static int GetChunkLength(string userChunkLength)
         {
             int chunkLength = 0;
+            bool parsingResult = false;
 
             if (!string.IsNullOrWhiteSpace(userChunkLength))
-                chunkLength = int.Parse(userChunkLength);
+                parsingResult = int.TryParse(userChunkLength, out chunkLength);
 
-            while (chunkLength < 1)
+            while (chunkLength < 1 || !parsingResult)
             {
                 Console.WriteLine("Please input length of chunks:");
                 userChunkLength = Console.ReadLine();
-                // check user input for value
-                chunkLength = int.Parse(userChunkLength);
+                parsingResult = int.TryParse(userChunkLength, out chunkLength);
 
                 if (chunkLength < 1)
-                    Console.WriteLine("Chunk size must be positive.");
+                    Console.WriteLine("Chunk size must be a positive integer.");
             }
             return chunkLength;
         }

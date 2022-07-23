@@ -14,15 +14,17 @@ namespace Signature
         Queue<Chunk> chunkQueue;
         Dictionary<int, string> hashes;
         int? finalChunkCount;
+        bool finalStatus;
 
         public FileProcessor(MyFileReader fileReader)
         {
             this.fileReader = fileReader;
             chunkQueue = new Queue<Chunk>();
             hashes = new Dictionary<int, string>();
+            finalStatus = true;
         }
 
-        public void Process()
+        public bool Process()
         {
             // read file
             Thread readingThread = new Thread(ReadFileIntoQueue);
@@ -47,7 +49,7 @@ namespace Signature
 
             // finish reading file
             readingThread.Join();
-            SignatureProvider.StopIfQueueIsEmpty();
+            QueueFinishedLoading();
 
             // finish computing
             foreach (Thread thread in computingThreads)
@@ -57,6 +59,14 @@ namespace Signature
 
             // finish output
             outputingThread.Join();
+            return finalStatus;
+        }
+
+        private void QueueFinishedLoading()
+        {
+            SignatureProvider.StopIfQueueIsEmpty();
+            if (!finalChunkCount.HasValue)
+                finalChunkCount = 0;
         }
 
         private void OutputResultsInOrder()
@@ -92,46 +102,21 @@ namespace Signature
 
         private void ReadFileIntoQueue()
         {
-            int numberInQueue = 0;
-            bool continueReading = true;
-            using (FileStream fileStream = fileReader.Initialize())
+            try
             {
-                if (fileStream == null)
-                {
-                    ConsoleInputOutput.ExitProgram(ProgramFinishReason.Error);
-                    return;
-                }
-
-                while (continueReading)
-                {
-                    bool enqueueingSuccessful = false;
-                    int attempts = 0;
-                    while (!enqueueingSuccessful)
-                    {
-                        try
-                        {
-                            (byte[] bytes, bool moreToRead) = fileReader.ReadNextChunk(fileStream);
-
-                            var chunk = new Chunk(bytes, numberInQueue++);
-                            lock (chunkQueue)
-                            {
-                                chunkQueue.Enqueue(chunk);
-                                enqueueingSuccessful = true;
-                            }
-                            continueReading = moreToRead;
-                        }
-                        catch (OutOfMemoryException)
-                        {
-                            if (attempts > 50)
-                                throw;
-                            attempts++;
-                        }
-                        // if queue is too long, wait for computing threads to remove some elements
-                        if (!enqueueingSuccessful)
-                            Thread.Sleep(50);
-                    }
-                }
-                finalChunkCount = numberInQueue;
+                finalChunkCount = fileReader.ReadFile(chunkQueue);
+            }
+            catch (Exception e)
+            {
+                finalStatus = false;
+                if (e is OutOfMemoryException)
+                    e.PrintException(ErrorReason.OutOfMemory); 
+                else if (e is ArgumentException)
+                    e.PrintException(ErrorReason.InvalidFileName);
+                else if (e is IOException)
+                    e.PrintException(ErrorReason.CouldNotOpenFile);
+                else
+                    e.PrintException();
             }
         }
     }
