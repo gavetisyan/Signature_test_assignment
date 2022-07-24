@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,9 +43,16 @@ namespace Signature
 
         internal static void PrintException(this Exception e, ErrorReason? reason = null)
         {
+            if (e is OutOfMemoryException)
+                reason = ErrorReason.OutOfMemory;
+            else if (e is ArgumentException)
+                reason = ErrorReason.InvalidFileName;
+            else if (e is IOException)
+                reason = ErrorReason.InvalidFileName;
+
             if (reason.HasValue)
                 Console.WriteLine(errorTexts[reason.Value]);
-            Console.WriteLine(e.Message + e.StackTrace);
+            Console.WriteLine(e.Message + "\n" + e.StackTrace);
         }
     }
 }

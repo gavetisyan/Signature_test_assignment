@@ -49,16 +49,16 @@ namespace Signature
         private static int GetChunkLength(string userChunkLength)
         {
             int chunkLength = 0;
-            bool parsingResult = false;
+            bool parsingSuccessful = false;
 
             if (!string.IsNullOrWhiteSpace(userChunkLength))
-                parsingResult = int.TryParse(userChunkLength, out chunkLength);
+                parsingSuccessful = int.TryParse(userChunkLength, out chunkLength);
 
-            while (chunkLength < 1 || !parsingResult)
+            while (chunkLength < 1 || !parsingSuccessful)
             {
                 Console.WriteLine("Please input length of chunks:");
                 userChunkLength = Console.ReadLine();
-                parsingResult = int.TryParse(userChunkLength, out chunkLength);
+                parsingSuccessful = int.TryParse(userChunkLength, out chunkLength);
 
                 if (chunkLength < 1)
                     Console.WriteLine("Chunk size must be a positive integer.");

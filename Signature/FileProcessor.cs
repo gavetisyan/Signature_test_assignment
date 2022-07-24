@@ -12,6 +12,7 @@ namespace Signature
     {
         MyFileReader fileReader;
         Queue<Chunk> chunkQueue;
+        Queue<Chunk> recycleQueue;
         Dictionary<int, string> hashes;
         int? finalChunkCount;
         bool finalStatus;
@@ -20,6 +21,7 @@ namespace Signature
         {
             this.fileReader = fileReader;
             chunkQueue = new Queue<Chunk>();
+            recycleQueue = new Queue<Chunk>();
             hashes = new Dictionary<int, string>();
             finalStatus = true;
         }
@@ -79,7 +81,7 @@ namespace Signature
 
                 while (!requiredEntryExists)
                 {
-                    if (finalChunkCount.HasValue && finalChunkCount.Value <= chunkCounter)
+                    if (finalChunkCount.HasValue && finalChunkCount.Value <= chunkCounter || !finalStatus)
                         return;
 
                     Thread.Sleep(1);
@@ -97,26 +99,27 @@ namespace Signature
 
         private void ProcessQueue()
         {
-            SignatureProvider.ProcessQueue(chunkQueue, hashes);
+            try
+            {
+                SignatureProvider.ProcessQueue(chunkQueue, recycleQueue, hashes);
+            }
+            catch (Exception e)
+            {
+                finalStatus = false;
+                e.PrintException();
+            }
         }
 
         private void ReadFileIntoQueue()
         {
             try
             {
-                finalChunkCount = fileReader.ReadFile(chunkQueue);
+                finalChunkCount = fileReader.ReadFile(chunkQueue, recycleQueue);
             }
             catch (Exception e)
             {
                 finalStatus = false;
-                if (e is OutOfMemoryException)
-                    e.PrintException(ErrorReason.OutOfMemory); 
-                else if (e is ArgumentException)
-                    e.PrintException(ErrorReason.InvalidFileName);
-                else if (e is IOException)
-                    e.PrintException(ErrorReason.CouldNotOpenFile);
-                else
-                    e.PrintException();
+                e.PrintException();
             }
         }
     }

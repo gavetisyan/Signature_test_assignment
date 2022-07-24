@@ -16,18 +16,19 @@ namespace Signature
             stopProcessing = true;
         }
 
-        public static void ProcessQueue(Queue<Chunk> chunkQueue, Dictionary<int, string> hashes)
+        public static void ProcessQueue(Queue<Chunk> chunkQueue,
+            Queue<Chunk> recycleQueue, Dictionary<int, string> hashes)
         {
             while (!stopProcessing)
             {
                 while (chunkQueue.Count > 0)
                 {
-                    ProcessQueueElement(chunkQueue, hashes);
+                    ProcessQueueElement(chunkQueue, recycleQueue, hashes);
                 }
             }
         }
 
-        private static void ProcessQueueElement(Queue<Chunk> chunkQueue, Dictionary<int, string> hashes)
+        private static void ProcessQueueElement(Queue<Chunk> chunkQueue, Queue<Chunk> recycleQueue, Dictionary<int, string> hashes)
         {
             Chunk chunk;
             lock (chunkQueue)
@@ -42,6 +43,10 @@ namespace Signature
             lock (hashes)
             {
                 hashes.Add(chunk.NumberInQueue, stringHash);
+            }
+            lock (recycleQueue)
+            {
+                recycleQueue.Enqueue(chunk);
             }
         }
 

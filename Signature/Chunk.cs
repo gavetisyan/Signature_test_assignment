@@ -10,12 +10,17 @@ namespace Signature
     internal class Chunk
     {
         public byte[] Bytes { get; }
-        public int NumberInQueue { get; }
+        public int NumberInQueue { get; private set; }
 
         public Chunk(byte[] bytes, int queueNumber)
         {
             Bytes = bytes;
             this.NumberInQueue = queueNumber;
+        }
+
+        public void Recycle(int newQueueNumber)
+        {
+            NumberInQueue = newQueueNumber;
         }
 
         public byte[] GetChunkHash()
