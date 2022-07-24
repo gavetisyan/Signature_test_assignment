@@ -66,7 +66,7 @@ namespace Signature
 
         private void QueueFinishedLoading()
         {
-            SignatureProvider.StopIfQueueIsEmpty();
+            ChunkQueueProcessor.StopIfQueueIsEmpty();
             if (!finalChunkCount.HasValue)
                 finalChunkCount = 0;
         }
@@ -101,7 +101,7 @@ namespace Signature
         {
             try
             {
-                SignatureProvider.ProcessQueue(chunkQueue, recycleQueue, hashes);
+                ChunkQueueProcessor.ProcessQueue(chunkQueue, recycleQueue, hashes);
             }
             catch (Exception e)
             {

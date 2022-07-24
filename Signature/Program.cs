@@ -28,7 +28,7 @@ namespace Signature
             TimeSpan processingTime = endTime - startTime;
 
             Console.WriteLine($"Start:\t{startTime}\nEnd:\t{endTime}\nProcessingTime:\t{processingTime}");
-            ConsoleInputOutput.ExitProgram(finalStatus ? ProgramFinishReason.Finished :ProgramFinishReason.Error);
+            ConsoleOutput.PrintExitMessage(finalStatus ? ProgramFinishReason.Finished :ProgramFinishReason.Error);
         }
 
         private static string GetFileLocation(string fileName)

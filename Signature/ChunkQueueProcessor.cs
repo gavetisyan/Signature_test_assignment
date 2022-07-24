@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Signature
 {
-    class SignatureProvider
+    class ChunkQueueProcessor
     {
         private static bool stopProcessing = false;
 
@@ -38,21 +38,15 @@ namespace Signature
                 else
                     return;
             }
-            byte[] hash = chunk.GetChunkHash();
-            string stringHash = GetStringHash(hash);
+            string hash = chunk.GetChunkHash();
             lock (hashes)
             {
-                hashes.Add(chunk.NumberInQueue, stringHash);
+                hashes.Add(chunk.NumberInQueue, hash);
             }
             lock (recycleQueue)
             {
                 recycleQueue.Enqueue(chunk);
             }
-        }
-
-        private static string GetStringHash(byte[] hash)
-        {
-            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
     }
 }

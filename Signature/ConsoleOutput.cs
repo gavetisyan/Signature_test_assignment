@@ -20,7 +20,7 @@ namespace Signature
         OutOfMemory
     }
 
-    static class ConsoleInputOutput
+    static class ConsoleOutput
     {
         private static Dictionary<ProgramFinishReason, string> exitReasonStrings =
             new Dictionary<ProgramFinishReason, string>{
@@ -35,14 +35,16 @@ namespace Signature
                 { ErrorReason.OutOfMemory, "Out of memory. Perhaps chunk size is too long." }
             };
 
-        public static void ExitProgram(ProgramFinishReason reason)
+        public static void PrintExitMessage(ProgramFinishReason reason)
         {
             Console.WriteLine(exitReasonStrings[reason]);
             Console.ReadKey();
         }
 
-        internal static void PrintException(this Exception e, ErrorReason? reason = null)
+        internal static void PrintException(this Exception e)
         {
+            ErrorReason? reason = null;
+
             if (e is OutOfMemoryException)
                 reason = ErrorReason.OutOfMemory;
             else if (e is ArgumentException)

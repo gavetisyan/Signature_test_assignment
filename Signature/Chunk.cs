@@ -23,12 +23,14 @@ namespace Signature
             NumberInQueue = newQueueNumber;
         }
 
-        public byte[] GetChunkHash()
+        public string GetChunkHash()
         {
+            byte[] hash;
             using (SHA256 hashingFunction = SHA256.Create())
             {
-                return hashingFunction.ComputeHash(Bytes);
+                hash = hashingFunction.ComputeHash(Bytes);
             }
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
     }
 }
